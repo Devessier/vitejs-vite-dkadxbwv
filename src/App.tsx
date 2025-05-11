@@ -1,59 +1,40 @@
 import { useState, useEffect } from 'react';
 import { type Person, fetchBio } from './api';
+import React from 'react';
 
 interface PageProps {
   initialPerson: string | undefined;
 }
 
 function Page({ initialPerson }: PageProps) {
+  const [person, setPerson] = useState<string | undefined>(initialPerson);
   const [bio, setBio] = useState<Person | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (initialPerson === undefined) {
-      setBio(null);
-      setIsLoading(false);
-      setError(null);
-
+    if (person === undefined) {
       return;
     }
 
-    setBio(null);
     setIsLoading(true);
     setError(null);
 
-    fetchBio(initialPerson)
+    fetchBio(person)
       .then((result) => {
         setBio(result);
       })
-      .catch((err) => {
-        setError(err);
+      .catch((err: Error) => {
+        setError(err.message);
       })
       .finally(() => {
         setIsLoading(false);
       });
-  }, [initialPerson]);
-
-  const handlePersonChange = (newPerson: string) => {
-    setIsLoading(true);
-    setError(null);
-
-    fetchBio(newPerson)
-      .then((result) => {
-        setBio(result);
-      })
-      .catch((err) => {
-        setError(err);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  };
+  }, [person]);
 
   return (
     <div>
-      {isLoading ? (
+      {isLoading && !bio ? (
         <p>Loading...</p>
       ) : error ? (
         <p>Error: {error}</p>
@@ -61,12 +42,20 @@ function Page({ initialPerson }: PageProps) {
         <div>
           <h1>{bio.name}</h1>
           <p>{bio.description}</p>
+
+          {isLoading && (
+            <p>Fetching in background...</p>
+          )}
         </div>
       ) : (
         <p>No bio available</p>
       )}
 
-      <button onClick={() => handlePersonChange('John')}>Load John</button>
+      <div style={{ display: 'flex', columnGap: '0.25rem' }}>
+        <button onClick={() => setPerson('John')}>Load John</button>
+        <button onClick={() => setPerson('Bob')}>Load Bob</button>
+        <button onClick={() => setPerson('Jane')}>Load Jane (she doesn't exist)</button>
+      </div>
     </div>
   );
 }

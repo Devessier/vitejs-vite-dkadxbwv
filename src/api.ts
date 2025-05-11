@@ -3,10 +3,14 @@ export interface Person {
   description: string;
 }
 
+function randomIntFromInterval(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
 export function fetchBio(person: string): Promise<Person> {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      if (person === 'error') {
+      if (person === 'Jane') {
         reject(new Error('Failed to fetch bio'));
       } else {
         resolve({
@@ -14,6 +18,6 @@ export function fetchBio(person: string): Promise<Person> {
           description: `This is the bio of ${person}.`,
         });
       }
-    }, Math.random() * 1000);
+    }, randomIntFromInterval(1_000, 3_000));
   });
 }
